@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
+import api, { getMediaUrl } from '../services/api';
 import StatusBadge from '../components/StatusBadge';
 import PriorityBadge from '../components/PriorityBadge';
 import WasteTypeBadge from '../components/WasteTypeBadge';
@@ -147,7 +147,7 @@ export default function CitizenDashboard() {
               <div>
                 {/* Image Thumbnail */}
                 <div className="relative h-44 bg-slate-100 overflow-hidden">
-                  <img src={c.imageUrl} alt="Waste report" className="w-full h-full object-cover" />
+                  <img src={getMediaUrl(c.imageUrl)} alt="Waste report" className="w-full h-full object-cover" />
                   <div className="absolute top-3 left-3">
                     <WasteTypeBadge type={c.wasteType} />
                   </div>

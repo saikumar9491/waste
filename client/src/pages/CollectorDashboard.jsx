@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
+import api, { getMediaUrl } from '../services/api';
 import toast from 'react-hot-toast';
 import StatusBadge from '../components/StatusBadge';
 import PriorityBadge from '../components/PriorityBadge';
@@ -84,9 +84,10 @@ export default function CollectorDashboard() {
 
   // Demo shortcut for desktop proof
   const loadDemoCleanProof = async () => {
-    setProofPreview('/uploads/sample-clean.jpg');
+    const demoUrl = getMediaUrl('/uploads/sample-clean.jpg');
+    setProofPreview(demoUrl);
     try {
-      const res = await fetch('/uploads/sample-clean.jpg');
+      const res = await fetch(demoUrl);
       const blob = await res.blob();
       const demoFile = new File([blob], 'demo-clean.jpg', { type: 'image/jpeg' });
       setProofFile(demoFile);
@@ -180,7 +181,7 @@ export default function CollectorDashboard() {
               >
                 <div>
                   <div className="relative h-44 bg-slate-100 overflow-hidden">
-                    <img src={task.imageUrl} alt="Waste task" className="w-full h-full object-cover" />
+                    <img src={getMediaUrl(task.imageUrl)} alt="Waste task" className="w-full h-full object-cover" />
                     <div className="absolute top-3 left-3">
                       <PriorityBadge priority={task.priority} pulse={task.priority === 'HIGH' || task.priority === 'CRITICAL'} />
                     </div>
@@ -266,7 +267,7 @@ export default function CollectorDashboard() {
           {completedTasks.map((t) => (
             <div key={t._id} className="bg-white p-5 rounded-2xl border border-slate-200 flex items-center gap-4 shadow-xs">
               <div className="w-16 h-16 rounded-xl overflow-hidden bg-emerald-950 shrink-0">
-                <img src={t.collectionProof?.imageUrl || t.imageUrl} alt="Clean proof" className="w-full h-full object-cover" />
+                <img src={getMediaUrl(t.collectionProof?.imageUrl || t.imageUrl)} alt="Clean proof" className="w-full h-full object-cover" />
               </div>
               <div className="space-y-1">
                 <span className="font-mono text-[11px] font-bold text-slate-500">{t.complaintId}</span>

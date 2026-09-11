@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import api from '../services/api';
+import api, { getMediaUrl } from '../services/api';
 import StatusBadge from '../components/StatusBadge';
 import PriorityBadge from '../components/PriorityBadge';
 import WasteTypeBadge from '../components/WasteTypeBadge';
@@ -100,7 +100,7 @@ export default function ComplaintDetails() {
                   📷 Reported Garbage (Before)
                 </span>
                 <div className="h-56 rounded-2xl overflow-hidden border border-slate-200 bg-black flex items-center justify-center">
-                  <img src={complaint.imageUrl} alt="Before collection" className="w-full h-full object-cover" />
+                  <img src={getMediaUrl(complaint.imageUrl)} alt="Before collection" className="w-full h-full object-cover" />
                 </div>
               </div>
 
@@ -111,7 +111,7 @@ export default function ComplaintDetails() {
                 </span>
                 {complaint.collectionProof?.imageUrl ? (
                   <div className="h-56 rounded-2xl overflow-hidden border border-emerald-300 bg-emerald-950 flex items-center justify-center">
-                    <img src={complaint.collectionProof.imageUrl} alt="After collection proof" className="w-full h-full object-cover" />
+                    <img src={getMediaUrl(complaint.collectionProof.imageUrl)} alt="After collection proof" className="w-full h-full object-cover" />
                   </div>
                 ) : (
                   <div className="h-56 rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-center p-4 bg-slate-50">

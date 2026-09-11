@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
+import api, { getMediaUrl } from '../services/api';
 import toast from 'react-hot-toast';
 import MapComponent from '../components/MapComponent';
 import PriorityBadge from '../components/PriorityBadge';
@@ -108,7 +108,7 @@ export default function ReportWaste() {
   // 1-Click Test Scenarios (Testing the exact 5 requirements)
   const testScenario = async (sampleFile, scenarioName) => {
     try {
-      const sampleUrl = '/uploads/' + sampleFile;
+      const sampleUrl = getMediaUrl('/uploads/' + sampleFile);
       const res = await fetch(sampleUrl);
       const blob = await res.blob();
       const file = new File([blob], sampleFile, { type: 'image/jpeg' });
