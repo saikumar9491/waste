@@ -190,7 +190,6 @@ export default function App() {
             </main>
 
             <Footer />
-            <DemoSwitcher />
           </div>
         </Router>
       </NotificationProvider>

@@ -11,10 +11,10 @@ const getDashboardStats = async (req, res) => {
     const inProgress = await Complaint.countDocuments({ status: { $in: ['Assigned', 'In Progress'] } });
     const resolved = await Complaint.countDocuments({ status: 'Resolved' });
 
-    const efficiency = totalReports > 0 ? Math.round((resolved / totalReports) * 100) : 92;
+    const efficiency = totalReports > 0 ? Math.round((resolved / totalReports) * 100) : 100;
 
     // Environmental calculations (Estimated)
-    const estimatedKgManaged = resolved * 45 + 1200; // ~45 kg avg per collection
+    const estimatedKgManaged = resolved * 45; // ~45 kg avg per collection
     const estimatedCo2Saved = Math.round(estimatedKgManaged * 0.75); // ~0.75 kg CO2 per kg waste diverted
     const estimatedRecyclableKg = Math.round(estimatedKgManaged * 0.38);
 
