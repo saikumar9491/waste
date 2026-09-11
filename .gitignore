@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Production build
+dist/
+dist-ssr/
+build/
+*.local
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+client/.env
+server/.env
+client/.env.*
+server/.env.*
+!client/.env.example
+!server/.env.example
+
+# Dynamic uploads (exclude runtime uploaded garbage images, keep sample fixtures)
+server/uploads/waste-*
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

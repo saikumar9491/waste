@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#475569" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#bg)"/>
+  <!-- Head & Shoulders -->
+  <path d="M180,400 C180,310 240,270 300,270 C360,270 420,310 420,400 Z" fill="#3b82f6" />
+  <circle cx="300" cy="180" r="70" fill="#fcd34d" />
+  <!-- Hair -->
+  <path d="M225,160 C230,90 370,90 375,160 C350,130 250,130 225,160 Z" fill="#1e293b" />
+  <!-- Eyes & Smile -->
+  <circle cx="275" cy="175" r="7" fill="#0f172a" />
+  <circle cx="325" cy="175" r="7" fill="#0f172a" />
+  <path d="M280,210 Q300,230 320,210" stroke="#0f172a" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <text x="300" y="50" fill="#f8fafc" font-size="20" font-family="sans-serif" font-weight="bold" text-anchor="middle">PERSON PORTRAIT / SELFIE PHOTO</text>
+  <text x="300" y="375" fill="#ffffff" font-size="14" font-family="sans-serif" font-weight="bold" text-anchor="middle">Human face portrait • No garbage present</text>
+</svg>

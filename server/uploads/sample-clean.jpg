@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400">
+  <defs>
+    <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#064e3b" />
+      <stop offset="100%" stop-color="#022c22" />
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#g2)"/>
+  <rect x="40" y="310" width="520" height="60" rx="8" fill="#10b981" opacity="0.3" />
+  <circle cx="300" cy="200" r="70" fill="#10b981" opacity="0.2" />
+  <path d="M260,200 L285,225 L345,165" fill="none" stroke="#34d399" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" />
+  <text x="300" y="80" fill="#ecfdf5" font-size="24" font-family="sans-serif" font-weight="bold" text-anchor="middle">COLLECTION VERIFICATION PROOF</text>
+  <text x="300" y="115" fill="#6ee7b7" font-size="16" font-family="sans-serif" text-anchor="middle">Cleaned, Sanitized &amp; Restored by WasteWise Collector</text>
+  <rect x="180" y="315" width="240" height="32" rx="16" fill="#10b981" fill-opacity="0.3" stroke="#34d399" stroke-width="1.5" />
+  <text x="300" y="336" fill="#a7f3d0" font-size="14" font-family="sans-serif" font-weight="bold" text-anchor="middle">✅ VERIFIED &amp; RESOLVED</text>
+</svg>
