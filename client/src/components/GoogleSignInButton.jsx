@@ -5,6 +5,7 @@ import { Sparkles, X, Check, ArrowRight } from 'lucide-react';
 export default function GoogleSignInButton({ role = 'citizen', label = 'Continue with Google', onSuccess, className = '' }) {
   const { googleLogin } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [loadingStatus, setLoadingStatus] = useState('');
   const [showDemoModal, setShowDemoModal] = useState(false);
   const [customEmail, setCustomEmail] = useState('');
   const [customName, setCustomName] = useState('');
@@ -29,23 +30,38 @@ export default function GoogleSignInButton({ role = 'citizen', label = 'Continue
     if (clientId && window.google?.accounts?.oauth2) {
       try {
         setLoading(true);
+        setLoadingStatus('Opening Google Sign-In...');
         const tokenClient = window.google.accounts.oauth2.initTokenClient({
           client_id: clientId,
           scope: 'email profile openid',
           callback: async (tokenResponse) => {
             if (tokenResponse.error) {
               setLoading(false);
+              setLoadingStatus('');
               console.warn('Google sign-in closed or error:', tokenResponse);
               return;
             }
             if (tokenResponse.access_token) {
-              const res = await googleLogin({ accessToken: tokenResponse.access_token, role });
-              setLoading(false);
-              if (res.success && onSuccess) {
-                onSuccess(res.user);
+              setLoadingStatus('Verifying account...');
+              const warmTimer = setTimeout(() => {
+                setLoadingStatus('Connecting to cloud server...');
+              }, 2000);
+              try {
+                const res = await googleLogin({ accessToken: tokenResponse.access_token, role });
+                clearTimeout(warmTimer);
+                setLoading(false);
+                setLoadingStatus('');
+                if (res.success && onSuccess) {
+                  onSuccess(res.user);
+                }
+              } catch (err) {
+                clearTimeout(warmTimer);
+                setLoading(false);
+                setLoadingStatus('');
               }
             } else {
               setLoading(false);
+              setLoadingStatus('');
             }
           }
         });
@@ -126,7 +142,7 @@ export default function GoogleSignInButton({ role = 'citizen', label = 'Continue
             />
           </svg>
 
-          <span>{loading ? 'Opening Google Sign-In...' : label}</span>
+          <span>{loading ? (loadingStatus || 'Opening Google Sign-In...') : label}</span>
         </button>
 
         {/* Demo profiles toggle for testing */}

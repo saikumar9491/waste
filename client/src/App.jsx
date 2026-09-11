@@ -4,9 +4,18 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
 
+import api from './services/api';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import DemoSwitcher from './components/DemoSwitcher';
+
+// Pre-warms the free-tier Render backend immediately on initial site visit
+function ServerWarmer() {
+  React.useEffect(() => {
+    api.get('/health').catch(() => {});
+  }, []);
+  return null;
+}
 
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -71,6 +80,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 export default function App() {
   return (
     <AuthProvider>
+      <ServerWarmer />
       <NotificationProvider>
         <Router>
           <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans selection:bg-emerald-500 selection:text-white">
