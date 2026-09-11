@@ -56,7 +56,7 @@ export default function RegisterDriverModal({ isOpen, onClose, onDriverAdded }) 
       });
 
       if (data.success) {
-        toast.success(`Driver ${name} registered successfully!`);
+        toast.success(data.message || `Driver ${name} registered successfully!`);
         if (onDriverAdded) onDriverAdded(data.driver);
         onClose();
         // Reset form
@@ -74,7 +74,7 @@ export default function RegisterDriverModal({ isOpen, onClose, onDriverAdded }) 
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 relative my-8">
+      <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5 relative my-8">
         <button
           onClick={onClose}
           className="absolute top-5 right-5 p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
@@ -89,9 +89,14 @@ export default function RegisterDriverModal({ isOpen, onClose, onDriverAdded }) 
           </div>
           <div>
             <span className="text-[11px] font-bold text-blue-700 uppercase tracking-wider">FLEET ONBOARDING</span>
-            <h3 className="text-xl font-extrabold text-slate-900">Register New Truck Driver</h3>
-            <p className="text-xs text-slate-500">Create driver login credentials and configure their collection truck</p>
+            <h3 className="text-xl font-extrabold text-slate-900">Register or Upgrade Truck Driver</h3>
+            <p className="text-xs text-slate-500">Configure truck credentials for new or existing users</p>
           </div>
+        </div>
+
+        {/* Info Tip */}
+        <div className="p-3 bg-blue-50/80 border border-blue-200 rounded-2xl text-[11px] text-blue-900 leading-relaxed">
+          💡 <b>Tip:</b> You can create a new driver account OR enter an existing email (e.g. citizen / Google user) to upgrade them into a Municipal Truck Driver.
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">

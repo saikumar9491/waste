@@ -152,41 +152,79 @@ const registerDriver = async (req, res) => {
   try {
     const { name, email, password, phone, vehicle, plateNumber, vehicleType, latitude, longitude, address } = req.body;
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ success: false, message: 'Name, email, and password are required.' });
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Driver email is required.' });
     }
 
-    const existingUser = await User.findOne({ email });
+    const cleanEmail = email.toLowerCase().trim();
+    const existingUser = await User.findOne({ email: cleanEmail });
+    let user;
+    let isExisting = false;
+
     if (existingUser) {
-      return res.status(400).json({ success: false, message: 'A user with this email already exists.' });
+      if (existingUser.role === 'admin') {
+        return res.status(400).json({
+          success: false,
+          message: 'This email belongs to an Administrator and cannot be reassigned as a Driver.'
+        });
+      }
+
+      isExisting = true;
+      user = existingUser;
+      user.role = 'collector';
+      if (name) user.name = name;
+      if (phone) user.phone = phone;
+      if (password && password.trim() !== '') {
+        user.password = password;
+      }
+      await user.save();
+    } else {
+      if (!name || !password) {
+        return res.status(400).json({ success: false, message: 'Name, email, and password are required for new driver accounts.' });
+      }
+
+      // 1. Create User account with role 'collector'
+      user = await User.create({
+        name,
+        email: cleanEmail,
+        password,
+        phone: phone || '',
+        role: 'collector'
+      });
     }
 
-    // 1. Create User account with role 'collector'
-    const user = await User.create({
-      name,
-      email,
-      password,
-      phone: phone || '',
-      role: 'collector'
-    });
+    // 2. Create or Update Collector Profile
+    let collector = await Collector.findOne({ userId: user._id });
 
-    // 2. Create Collector Profile
-    const collector = await Collector.create({
-      userId: user._id,
-      vehicle: vehicle || 'Municipal Truck-01',
-      plateNumber: plateNumber || 'TS-09-UB-1001',
-      vehicleType: vehicleType || 'Truck',
-      availability: 'Available',
-      latitude: latitude ? Number(latitude) : 17.38504,
-      longitude: longitude ? Number(longitude) : 78.48667,
-      currentAddress: address || 'Municipal Fleet Depot',
-      speed: 0,
-      batteryLevel: 100
-    });
+    if (collector) {
+      collector.vehicle = vehicle || collector.vehicle || 'Municipal Truck-01';
+      collector.plateNumber = plateNumber || collector.plateNumber || 'TS-09-UB-1001';
+      collector.vehicleType = vehicleType || collector.vehicleType || 'Truck';
+      collector.availability = 'Available';
+      if (latitude) collector.latitude = Number(latitude);
+      if (longitude) collector.longitude = Number(longitude);
+      if (address) collector.currentAddress = address;
+      await collector.save();
+    } else {
+      collector = await Collector.create({
+        userId: user._id,
+        vehicle: vehicle || 'Municipal Truck-01',
+        plateNumber: plateNumber || 'TS-09-UB-1001',
+        vehicleType: vehicleType || 'Truck',
+        availability: 'Available',
+        latitude: latitude ? Number(latitude) : 17.38504,
+        longitude: longitude ? Number(longitude) : 78.48667,
+        currentAddress: address || 'Municipal Fleet Depot',
+        speed: 0,
+        batteryLevel: 100
+      });
+    }
 
     res.status(201).json({
       success: true,
-      message: 'Driver and truck registered successfully!',
+      message: isExisting
+        ? `Driver access granted to existing account (${user.email}) successfully!`
+        : `Driver ${user.name} and truck registered successfully!`,
       driver: {
         _id: collector._id,
         userId: user._id,
