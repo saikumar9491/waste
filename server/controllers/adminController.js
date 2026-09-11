@@ -146,8 +146,88 @@ const getHotspots = async (req, res) => {
   }
 };
 
+// @desc Register a new truck driver and vehicle profile
+// @route POST /api/admin/drivers
+const registerDriver = async (req, res) => {
+  try {
+    const { name, email, password, phone, vehicle, plateNumber, vehicleType, latitude, longitude, address } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ success: false, message: 'Name, email, and password are required.' });
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: 'A user with this email already exists.' });
+    }
+
+    // 1. Create User account with role 'collector'
+    const user = await User.create({
+      name,
+      email,
+      password,
+      phone: phone || '',
+      role: 'collector'
+    });
+
+    // 2. Create Collector Profile
+    const collector = await Collector.create({
+      userId: user._id,
+      vehicle: vehicle || 'Municipal Truck-01',
+      plateNumber: plateNumber || 'TS-09-UB-1001',
+      vehicleType: vehicleType || 'Truck',
+      availability: 'Available',
+      latitude: latitude ? Number(latitude) : 17.38504,
+      longitude: longitude ? Number(longitude) : 78.48667,
+      currentAddress: address || 'Municipal Fleet Depot',
+      speed: 0,
+      batteryLevel: 100
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Driver and truck registered successfully!',
+      driver: {
+        _id: collector._id,
+        userId: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        vehicle: collector.vehicle,
+        plateNumber: collector.plateNumber,
+        vehicleType: collector.vehicleType,
+        availability: collector.availability,
+        latitude: collector.latitude,
+        longitude: collector.longitude
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc Delete a driver and their collector profile
+// @route DELETE /api/admin/drivers/:id
+const deleteDriver = async (req, res) => {
+  try {
+    const collector = await Collector.findById(req.params.id);
+    if (!collector) {
+      return res.status(404).json({ success: false, message: 'Driver not found.' });
+    }
+
+    await User.findByIdAndDelete(collector.userId);
+    await Collector.findByIdAndDelete(collector._id);
+
+    res.json({ success: true, message: 'Driver and vehicle profile removed successfully.' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   getDashboardStats,
   getAnalytics,
-  getHotspots
+  getHotspots,
+  registerDriver,
+  deleteDriver
 };

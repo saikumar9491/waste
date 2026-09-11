@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import StatusBadge from '../components/StatusBadge';
 import PriorityBadge from '../components/PriorityBadge';
 import WasteTypeBadge from '../components/WasteTypeBadge';
+import RegisterDriverModal from '../components/RegisterDriverModal';
 import {
   BarChart3,
   MapPin,
@@ -15,7 +16,12 @@ import {
   Sparkles,
   Search,
   TrendingUp,
-  Eye
+  Eye,
+  Plus,
+  Trash2,
+  Navigation,
+  Phone,
+  UserCheck
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -26,6 +32,7 @@ export default function AdminDashboard() {
   const [advisory, setAdvisory] = useState(null);
   const [filterPriority, setFilterPriority] = useState('all');
   const [search, setSearch] = useState('');
+  const [isDriverModalOpen, setIsDriverModalOpen] = useState(false);
 
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [recommendedCollectors, setRecommendedCollectors] = useState([]);
@@ -90,6 +97,19 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleDeleteDriver = async (collectorId, driverName) => {
+    if (!window.confirm(`Are you sure you want to remove driver "${driverName}"?`)) return;
+    try {
+      const { data } = await api.delete('/admin/drivers/' + collectorId);
+      if (data.success) {
+        toast.success(`Driver "${driverName}" removed successfully`);
+        fetchDashboardData();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to delete driver');
+    }
+  };
+
   const filteredComplaints = complaints.filter((c) => {
     if (filterPriority !== 'all' && c.priority !== filterPriority) return false;
     if (search.trim() !== '') {
@@ -116,6 +136,13 @@ export default function AdminDashboard() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
+          <button
+            onClick={() => setIsDriverModalOpen(true)}
+            className="px-4 py-2.5 rounded-xl font-bold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-md transition flex items-center gap-2 cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Register Driver</span>
+          </button>
           <Link
             to="/track-drivers"
             className="px-4 py-2.5 rounded-xl font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white shadow-md transition flex items-center gap-2 cursor-pointer"
@@ -391,6 +418,134 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+
+      {/* Municipal Fleet & Registered Drivers Section */}
+      <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
+        <div className="p-6 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-extrabold text-slate-900">Municipal Fleet & Registered Drivers</h2>
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800">
+                {collectors.length} {collectors.length === 1 ? 'Driver' : 'Drivers'}
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Manage truck drivers, vehicle assignments, and dispatch availability
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2.5">
+            <Link
+              to="/track-drivers"
+              className="px-3.5 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs transition flex items-center gap-1.5"
+            >
+              <Truck className="w-3.5 h-3.5 text-blue-600" />
+              <span>Live GPS Map</span>
+            </Link>
+            <button
+              onClick={() => setIsDriverModalOpen(true)}
+              className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Register New Driver</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="p-6">
+          {collectors.length === 0 ? (
+            <div className="text-center py-12 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50 space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center mx-auto shadow-xs">
+                <Truck className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-sm font-extrabold text-slate-800">No Fleet Drivers Registered Yet</h3>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
+                  Onboard drivers with truck models and mobile login credentials so you can dispatch waste collection tasks to them.
+                </p>
+              </div>
+              <button
+                onClick={() => setIsDriverModalOpen(true)}
+                className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm transition inline-flex items-center gap-1.5 cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Register First Driver</span>
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {collectors.map((col) => (
+                <div
+                  key={col._id}
+                  className="bg-slate-50/70 p-5 rounded-2xl border border-slate-200 hover:border-blue-300 hover:shadow-xs transition space-y-3 flex flex-col justify-between"
+                >
+                  <div className="space-y-2.5">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-sm shadow-xs">
+                          {col.userId?.name?.charAt(0) || 'D'}
+                        </div>
+                        <div>
+                          <h4 className="font-extrabold text-sm text-slate-900">{col.userId?.name || 'Driver'}</h4>
+                          <span className="text-[11px] text-slate-500 font-mono">{col.userId?.email}</span>
+                        </div>
+                      </div>
+                      <span className={'px-2 py-0.5 rounded-full text-[10px] font-extrabold ' +
+                        (col.availability === 'Available' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800')
+                      }>
+                        {col.availability || 'Available'}
+                      </span>
+                    </div>
+
+                    <div className="bg-white p-3 rounded-xl border border-slate-200 text-xs space-y-1.5">
+                      <div className="flex justify-between text-slate-600">
+                        <span>Vehicle:</span>
+                        <b className="text-slate-900">{col.vehicle}</b>
+                      </div>
+                      <div className="flex justify-between text-slate-600">
+                        <span>Plate:</span>
+                        <span className="font-mono font-bold text-slate-800 text-[11px]">{col.plateNumber || 'TS-09-UB-1001'}</span>
+                      </div>
+                      <div className="flex justify-between text-slate-600">
+                        <span>Phone:</span>
+                        <span className="font-semibold text-slate-800">{col.userId?.phone || 'Not set'}</span>
+                      </div>
+                      <div className="flex justify-between text-slate-600">
+                        <span>Active Tasks:</span>
+                        <b className="text-emerald-700">{col.assignedTasks || 0}</b>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-200/80">
+                    <Link
+                      to="/track-drivers"
+                      className="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                    >
+                      <Navigation className="w-3.5 h-3.5" />
+                      <span>Track on Map</span>
+                    </Link>
+                    <button
+                      onClick={() => handleDeleteDriver(col._id, col.userId?.name || 'Driver')}
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                      title="Remove Driver"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Driver Registration Modal */}
+      <RegisterDriverModal
+        isOpen={isDriverModalOpen}
+        onClose={() => setIsDriverModalOpen(false)}
+        onDriverAdded={() => fetchDashboardData()}
+      />
     </div>
   );
 }
