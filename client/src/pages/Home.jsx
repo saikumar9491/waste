@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import LoginPromptModal from '../components/LoginPromptModal';
 import {
   Camera,
   MapPin,
@@ -23,16 +22,9 @@ export default function Home() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Login modal trigger state
-  const [loginModalOpen, setLoginModalOpen] = useState(false);
-  const [modalFeature, setModalFeature] = useState('');
-  const [modalTarget, setModalTarget] = useState('');
-
   const handleFeatureClick = (featureTitle, targetPath) => {
     if (!user) {
-      setModalFeature(featureTitle);
-      setModalTarget(targetPath);
-      setLoginModalOpen(true);
+      navigate('/login');
     } else {
       navigate(targetPath);
     }
@@ -40,13 +32,6 @@ export default function Home() {
 
   return (
     <div className="space-y-20 pb-20">
-      {/* Login Prompt Modal */}
-      <LoginPromptModal
-        isOpen={loginModalOpen}
-        onClose={() => setLoginModalOpen(false)}
-        featureTitle={modalFeature}
-        targetPath={modalTarget}
-      />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-28 bg-gradient-to-b from-emerald-50/70 via-white to-white">

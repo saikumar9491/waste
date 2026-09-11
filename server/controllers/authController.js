@@ -115,48 +115,13 @@ const getMe = async (req, res) => {
   }
 };
 
-// @desc 1-Click Demo Login for presentations
+// @desc 1-Click Demo Login for presentations (Disabled for production launch)
 // @route POST /api/auth/demo-login
 const demoLogin = async (req, res) => {
-  try {
-    const { role } = req.body; // 'citizen' | 'collector' | 'admin'
-    const roleTarget = ['citizen', 'collector', 'admin'].includes(role) ? role : 'citizen';
-
-    let user = await User.findOne({ role: roleTarget });
-
-    if (!user) {
-      // Create on the fly if seeder hasn't been run yet
-      user = await User.create({
-        name: roleTarget === 'admin' ? 'Pooja Verma (Chief Officer)' : roleTarget === 'collector' ? 'Raj Kumar' : 'Sai Kumar',
-        email: `${roleTarget}@wastewise.org`,
-        password: 'password123',
-        role: roleTarget,
-        phone: '+91 98765 43210',
-        ecoPoints: roleTarget === 'citizen' ? 420 : 0,
-        badges: [{ name: 'Eco Champion', icon: '🏆', earnedAt: new Date() }]
-      });
-    }
-
-    const token = generateToken(user._id, user.role);
-
-    res.json({
-      success: true,
-      token,
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        phone: user.phone,
-        avatar: user.avatar,
-        authProvider: user.authProvider || 'local',
-        ecoPoints: user.ecoPoints,
-        badges: user.badges
-      }
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
+  return res.status(403).json({
+    success: false,
+    message: 'Demo login is disabled in production. Please sign in with your Google account or email.'
+  });
 };
 
 // @desc Google OAuth authentication
