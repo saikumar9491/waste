@@ -480,18 +480,40 @@ export default function ReportWaste() {
                           </div>
                         </div>
 
-                        <div className="bg-white/60 p-3 rounded-xl border border-amber-200 text-[11px] text-slate-600 flex flex-col sm:flex-row items-center justify-between gap-3">
-                          <span>
-                            To ensure high data quality, reports cannot be filed without visible waste.
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => fileInputRef.current?.click()}
-                            className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 shrink-0"
-                          >
-                            <Camera className="w-3.5 h-3.5" />
-                            <span>Retake / Upload Another Photo</span>
-                          </button>
+                        <div className="bg-white/90 p-4 rounded-xl border border-amber-200 text-xs text-slate-700 flex flex-col sm:flex-row items-center justify-between gap-3">
+                          <div>
+                            <p className="font-bold text-slate-900">Is this actually waste?</p>
+                            <p className="text-[11px] text-slate-500">If the AI scanner missed it, you can override and proceed with filing your report.</p>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setAiResult({
+                                  wasteDetected: true,
+                                  wasteType: 'Plastic',
+                                  confidence: 0.92,
+                                  description: 'Citizen verified waste accumulation.',
+                                  priority: 'HIGH',
+                                  priorityReason: 'Citizen verified in public area.',
+                                  engine: 'Citizen Confirmation'
+                                });
+                                toast.success('Confirmed as waste! You can now submit.');
+                              }}
+                              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span>Confirm Waste & Proceed</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => fileInputRef.current?.click()}
+                              className="px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs transition flex items-center gap-1.5 cursor-pointer"
+                            >
+                              <Camera className="w-3.5 h-3.5" />
+                              <span>Retake</span>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     )}
