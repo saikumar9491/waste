@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
-import { Recycle, Bell, CheckCircle2, LogOut, MapPin, BarChart3, Truck, PlusCircle, Award, Menu, X } from 'lucide-react';
+import { useLocation } from '../context/LocationContext';
+import { Recycle, Bell, CheckCircle2, LogOut, MapPin, BarChart3, Truck, PlusCircle, Award, Menu, X, Navigation } from 'lucide-react';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const { coords, address, requestLocation } = useLocation();
   const [showNotifications, setShowNotifications] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -93,6 +95,29 @@ export default function Navbar() {
           </nav>
 
           <div className="flex items-center gap-3">
+            {/* Location Indicator */}
+            {coords && address ? (
+              <button
+                type="button"
+                onClick={() => requestLocation(true)}
+                title={`Your Detected GPS: ${address} (Click to refresh)`}
+                className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-xs font-semibold max-w-[170px] truncate transition cursor-pointer"
+              >
+                <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <span className="truncate">{address.split(',')[0]}</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => requestLocation(true)}
+                title="Enable browser location for auto-detection"
+                className="hidden md:flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 text-xs font-bold transition cursor-pointer"
+              >
+                <Navigation className="w-3 h-3 text-emerald-600" />
+                <span>Enable GPS</span>
+              </button>
+            )}
+
             {user ? (
               <>
                 {user.role === 'citizen' && (

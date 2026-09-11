@@ -3,10 +3,12 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
+import { LocationProvider } from './context/LocationContext';
 
 import api from './services/api';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import LocationPromptBanner from './components/LocationPromptBanner';
 import DemoSwitcher from './components/DemoSwitcher';
 
 // Pre-warms the free-tier Render backend immediately on initial site visit
@@ -80,25 +82,27 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 export default function App() {
   return (
     <AuthProvider>
-      <ServerWarmer />
-      <NotificationProvider>
-        <Router>
-          <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans selection:bg-emerald-500 selection:text-white">
-            <Toaster
-              position="top-right"
-              toastOptions={{
-                duration: 3500,
-                style: {
-                  background: '#0f172a',
-                  color: '#fff',
-                  borderRadius: '12px',
-                  fontSize: '13px',
-                  fontWeight: 600
-                }
-              }}
-            />
+      <LocationProvider>
+        <ServerWarmer />
+        <NotificationProvider>
+          <Router>
+            <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans selection:bg-emerald-500 selection:text-white">
+              <Toaster
+                position="top-right"
+                toastOptions={{
+                  duration: 3500,
+                  style: {
+                    background: '#0f172a',
+                    color: '#fff',
+                    borderRadius: '12px',
+                    fontSize: '13px',
+                    fontWeight: 600
+                  }
+                }}
+              />
 
-            <Navbar />
+              <LocationPromptBanner />
+              <Navbar />
 
             <main className="flex-1">
               <Routes>
@@ -189,10 +193,11 @@ export default function App() {
               </Routes>
             </main>
 
-            <Footer />
-          </div>
-        </Router>
-      </NotificationProvider>
+              <Footer />
+            </div>
+          </Router>
+        </NotificationProvider>
+      </LocationProvider>
     </AuthProvider>
   );
 }

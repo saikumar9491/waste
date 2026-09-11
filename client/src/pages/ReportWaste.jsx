@@ -1,6 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLocation } from '../context/LocationContext';
 import api, { getMediaUrl } from '../services/api';
 import toast from 'react-hot-toast';
 import MapComponent from '../components/MapComponent';
@@ -18,21 +19,49 @@ import {
   Info,
   Navigation,
   ShieldAlert,
-  Loader2
+  Loader2,
+  Chrome
 } from 'lucide-react';
 
 export default function ReportWaste() {
   const { user } = useAuth();
+  const {
+    coords: globalCoords,
+    address: globalAddress,
+    requestLocation,
+    permissionStatus,
+    reverseGeocode
+  } = useLocation();
   const navigate = useNavigate();
 
   // Photo & upload state
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
 
-  // GPS Location state
-  const [coords, setCoords] = useState({ lat: 31.2210, lng: 75.7720 });
-  const [address, setAddress] = useState('College Road, Phagwara, Punjab');
+  // GPS Location state - auto-initializes from browser/Chrome GPS
+  const [coords, setCoords] = useState(() => globalCoords || { lat: 17.3850, lng: 78.4867 });
+  const [address, setAddress] = useState(() => globalAddress || 'Detecting GPS location...');
   const [locationLoading, setLocationLoading] = useState(false);
+
+  // Sync when global coords are acquired from Chrome
+  useEffect(() => {
+    if (globalCoords) {
+      setCoords(globalCoords);
+    }
+  }, [globalCoords]);
+
+  useEffect(() => {
+    if (globalAddress) {
+      setAddress(globalAddress);
+    }
+  }, [globalAddress]);
+
+  // Request browser location immediately when visiting Report Waste page if not yet acquired
+  useEffect(() => {
+    if (!globalCoords && permissionStatus !== 'denied') {
+      requestLocation(false);
+    }
+  }, [globalCoords, permissionStatus, requestLocation]);
 
   // AI Pipeline State
   const [aiAnalyzing, setAiAnalyzing] = useState(false);
@@ -119,40 +148,22 @@ export default function ReportWaste() {
     }
   };
 
-  // Get Browser GPS Location
+  // Get Browser GPS Location (Chrome / Mobile GPS)
   const handleGetLocation = () => {
-    if (!navigator.geolocation) {
-      toast.error('Geolocation is not supported by your browser');
-      return;
-    }
-
     setLocationLoading(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const lat = Number(pos.coords.latitude.toFixed(5));
-        const lng = Number(pos.coords.longitude.toFixed(5));
-        setCoords({ lat, lng });
-        setLocationLoading(false);
+    requestLocation(true);
+    setTimeout(() => setLocationLoading(false), 1200);
+  };
 
-        fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng)
-          .then((r) => r.json())
-          .then((data) => {
-            if (data && data.display_name) {
-              setAddress(data.display_name.split(',').slice(0, 3).join(', '));
-            }
-          })
-          .catch(() => {
-            setAddress('GPS: ' + lat + ', ' + lng);
-          });
-
-        toast.success('📍 Precise GPS coordinates locked!');
-      },
-      (err) => {
-        setLocationLoading(false);
-        toast.error('Could not obtain GPS permission. You can drag the map pin manually.');
-      },
-      { enableHighAccuracy: true, timeout: 8000 }
-    );
+  const handleMarkerDragEnd = async (newPos) => {
+    setCoords(newPos);
+    try {
+      const addr = await reverseGeocode(newPos.lat, newPos.lng);
+      if (addr) setAddress(addr);
+      toast.success('Pin moved: ' + newPos.lat.toFixed(4) + ', ' + newPos.lng.toFixed(4));
+    } catch (e) {
+      setAddress(`GPS: ${newPos.lat}, ${newPos.lng}`);
+    }
   };
 
   // Submit Complaint
@@ -546,6 +557,18 @@ export default function ReportWaste() {
               </button>
             </div>
 
+            {permissionStatus === 'denied' && (
+              <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-900 flex items-start gap-3">
+                <Chrome className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <p className="font-bold text-amber-950">Chrome Location Blocked</p>
+                  <p className="text-amber-800 text-[11px] leading-relaxed">
+                    To auto-detect coordinates: In Chrome's address bar, click the <b>tune / sliders (🎛️)</b> icon on the left &gt; switch <b>Location</b> to <b>Allow</b> &gt; refresh the page. You can also drag the red map pin directly to your waste location.
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
               <div>
                 <p className="font-extrabold text-slate-800 flex items-center gap-1.5 text-sm">
@@ -567,10 +590,7 @@ export default function ReportWaste() {
                 zoom={15}
                 height="256px"
                 draggableMarker={coords}
-                onMarkerDragEnd={(newPos) => {
-                  setCoords(newPos);
-                  toast.success('Updated coordinates: ' + newPos.lat + ', ' + newPos.lng);
-                }}
+                onMarkerDragEnd={handleMarkerDragEnd}
               />
             </div>
           </div>
